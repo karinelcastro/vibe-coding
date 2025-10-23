@@ -1,0 +1,10 @@
+#arquivos de configuração automatica desnecessários
+*sh
+
+#mantém os arquivos de instalação e início do app
+!install.sh
+!start.sh
+
+#remove .txt de orientação da mudança das imgs
+FOTOS.txt
+
