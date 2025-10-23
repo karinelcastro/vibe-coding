@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AdminPanel from './AdminPanel'; // Importe o componente AdminPanel
 
 const API_BASE = 'http://localhost:3001/api';
 
@@ -8,7 +9,7 @@ const Loading = () => (
   </div>
 );
 
-const Header = ({ cartItems, onCartClick, user, onLoginClick, onLogout, currentView, onViewChange }) => {
+const Header = ({ cartItems, onCartClick, user, onLoginClick, onLogout, currentView, onViewChange, showAdmin, onAdminToggle }) => {
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -30,25 +31,38 @@ const Header = ({ cartItems, onCartClick, user, onLoginClick, onLogout, currentV
               <button onClick={onLoginClick} className="login-button">👤 Entrar</button>
             )}
             
-            <button 
-              onClick={() => onViewChange('catalog')} 
-              className={`nav-button ${currentView === 'catalog' ? 'active' : ''}`}
-            >
-              🏠 Catálogo
-            </button>
+            {!showAdmin && (
+              <>
+                <button 
+                  onClick={() => onViewChange('catalog')} 
+                  className={`nav-button ${currentView === 'catalog' ? 'active' : ''}`}
+                >
+                  🏠 Catálogo
+                </button>
 
-            {user && (
-              <button 
-                onClick={() => onViewChange('favorites')} 
-                className={`nav-button ${currentView === 'favorites' ? 'active' : ''}`}
-              >
-                ❤️ Favoritos
-              </button>
+                {user && (
+                  <button 
+                    onClick={() => onViewChange('favorites')} 
+                    className={`nav-button ${currentView === 'favorites' ? 'active' : ''}`}
+                  >
+                    ❤️ Favoritos
+                  </button>
+                )}
+                
+                <button onClick={onCartClick} className="cart-button">
+                  🛒 <span>Carrinho</span>
+                  {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
+                </button>
+              </>
             )}
-            
-            <button onClick={onCartClick} className="cart-button">
-              🛒 <span>Carrinho</span>
-              {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
+
+            {/* Botão Admin - sempre visível */}
+            <button 
+              onClick={onAdminToggle} 
+              className={`nav-button ${showAdmin ? 'active' : ''}`}
+              style={{ background: showAdmin ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)' }}
+            >
+              ⚙️ Admin
             </button>
           </div>
         </div>
@@ -383,6 +397,7 @@ const App = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [currentView, setCurrentView] = useState('catalog');
+  const [showAdmin, setShowAdmin] = useState(false); // NOVO: controla visualização admin
 
   useEffect(() => {
     fetchCupcakes();
@@ -506,6 +521,7 @@ const App = () => {
     setFavorites([]);
     setFavoriteCupcakes([]);
     setCurrentView('catalog');
+    setShowAdmin(false); // Sair do admin ao fazer logout
     localStorage.removeItem('user');
   };
 
@@ -519,6 +535,14 @@ const App = () => {
     setCartItems([]);
     setOrderSuccess(result);
     setTimeout(() => setOrderSuccess(null), 8000);
+  };
+
+  // NOVO: Toggle do painel admin
+  const handleAdminToggle = () => {
+    setShowAdmin(!showAdmin);
+    if (!showAdmin) {
+      setShowCart(false); // Fecha o carrinho ao entrar no admin
+    }
   };
 
   if (loading) {
@@ -541,6 +565,27 @@ const App = () => {
     );
   }
 
+  // NOVO: Renderiza o painel admin se showAdmin for true
+  if (showAdmin) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+        <Header 
+          cartItems={cartItems} 
+          onCartClick={() => setShowCart(true)} 
+          user={user} 
+          onLoginClick={() => setShowAuth(true)} 
+          onLogout={handleLogout}
+          currentView={currentView}
+          onViewChange={setCurrentView}
+          showAdmin={showAdmin}
+          onAdminToggle={handleAdminToggle}
+        />
+        <AdminPanel />
+      </div>
+    );
+  }
+
+  // Renderiza a loja normal
   return (
     <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
       <Header 
@@ -551,6 +596,8 @@ const App = () => {
         onLogout={handleLogout}
         currentView={currentView}
         onViewChange={setCurrentView}
+        showAdmin={showAdmin}
+        onAdminToggle={handleAdminToggle}
       />
 
       {orderSuccess && (
