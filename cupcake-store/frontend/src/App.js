@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AdminPanel from "./AdminPanel"; // Importe o componente AdminPanel
+import AdminPanel from "./AdminPanel";
 
 const API_BASE = "http://localhost:3001/api";
 
@@ -21,6 +21,7 @@ const Header = ({
   onAdminToggle,
 }) => {
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const isAdmin = user?.role === "admin";
 
   return (
     <header className="header">
@@ -34,7 +35,10 @@ const Header = ({
           <div className="header-actions">
             {user ? (
               <div className="user-section">
-                <span className="user-greeting">Olá, {user.name}!</span>
+                <span className="user-greeting">
+                  Olá, {user.name}!
+                  {isAdmin && <span className="admin-badge">ADMIN</span>}
+                </span>
                 <button onClick={onLogout} className="logout-button">
                   Sair
                 </button>
@@ -76,18 +80,17 @@ const Header = ({
               </>
             )}
 
-            {/* Botão Admin - sempre visível */}
-            <button
-              onClick={onAdminToggle}
-              className={`nav-button ${showAdmin ? "active" : ""}`}
-              style={{
-                background: showAdmin
-                  ? "rgba(255, 255, 255, 0.3)"
-                  : "rgba(255, 255, 255, 0.1)",
-              }}
-            >
-              ⚙️ Admin
-            </button>
+            {/* Botão Admin - só visível para admins */}
+            {isAdmin && (
+              <button
+                onClick={onAdminToggle}
+                className={`nav-button admin-nav-button ${
+                  showAdmin ? "active" : ""
+                }`}
+              >
+                ⚙️ Admin
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -601,8 +604,7 @@ const App = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [currentView, setCurrentView] = useState("catalog");
-  const [showAdmin, setShowAdmin] = useState(false); // NOVO: controla visualização admin
-  const [isAdmin, setIsAdmin] = useState(false); // NOVO: verifica se usuário é admin
+  const [showAdmin, setShowAdmin] = useState(false);
 
   useEffect(() => {
     fetchCupcakes();
@@ -611,21 +613,8 @@ const App = () => {
       const userData = JSON.parse(savedUser);
       setUser(userData);
       loadFavorites(userData.id);
-      checkAdminRole(userData.id);
     }
   }, []);
-
-  // NOVO: Verificar se usuário é admin
-  const checkAdminRole = async (userId) => {
-    try {
-      const response = await fetch(`${API_BASE}/auth/check-admin/${userId}`);
-      const data = await response.json();
-      setIsAdmin(data.isAdmin);
-    } catch (error) {
-      console.error("Erro ao verificar permissões:", error);
-      setIsAdmin(false);
-    }
-  };
 
   useEffect(() => {
     if (currentView === "favorites" && user) {
@@ -754,7 +743,7 @@ const App = () => {
     setFavorites([]);
     setFavoriteCupcakes([]);
     setCurrentView("catalog");
-    setShowAdmin(false); // Sair do admin ao fazer logout
+    setShowAdmin(false);
     localStorage.removeItem("user");
   };
 
@@ -770,11 +759,12 @@ const App = () => {
     setTimeout(() => setOrderSuccess(null), 8000);
   };
 
-  // NOVO: Toggle do painel admin
   const handleAdminToggle = () => {
-    setShowAdmin(!showAdmin);
-    if (!showAdmin) {
-      setShowCart(false); // Fecha o carrinho ao entrar no admin
+    if (user?.role === "admin") {
+      setShowAdmin(!showAdmin);
+      if (!showAdmin) {
+        setShowCart(false);
+      }
     }
   };
 
@@ -806,8 +796,8 @@ const App = () => {
     );
   }
 
-  // NOVO: Renderiza o painel admin se showAdmin for true
-  if (showAdmin) {
+  // Renderiza o painel admin se showAdmin for true E o usuário for admin
+  if (showAdmin && user?.role === "admin") {
     return (
       <div style={{ minHeight: "100vh", background: "#f9fafb" }}>
         <Header
@@ -821,7 +811,7 @@ const App = () => {
           showAdmin={showAdmin}
           onAdminToggle={handleAdminToggle}
         />
-        <AdminPanel />
+        <AdminPanel user={user} />
       </div>
     );
   }
