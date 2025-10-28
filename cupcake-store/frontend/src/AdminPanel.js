@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
-const API_BASE = "http://localhost:3001/api";
+const API_BASE = 'http://localhost:3001/api';
 
 // Estilos CSS inline
 const styles = `
@@ -614,7 +614,7 @@ const styles = `
 `;
 
 const AdminPanel = () => {
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState(null);
   const [cupcakes, setCupcakes] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -624,12 +624,12 @@ const AdminPanel = () => {
   const [notification, setNotification] = useState(null);
 
   useEffect(() => {
-    if (activeTab === "dashboard") fetchStats();
-    if (activeTab === "cupcakes") fetchCupcakes();
-    if (activeTab === "orders") fetchOrders();
+    if (activeTab === 'dashboard') fetchStats();
+    if (activeTab === 'cupcakes') fetchCupcakes();
+    if (activeTab === 'orders') fetchOrders();
   }, [activeTab]);
 
-  const showNotification = (message, type = "success") => {
+  const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -637,11 +637,14 @@ const AdminPanel = () => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/stats`);
+      const user = JSON.parse(localStorage.getItem('user'));
+      const res = await fetch(`${API_BASE}/admin/stats`, {
+        headers: { 'x-user-id': user?.id }
+      });
       const data = await res.json();
       setStats(data);
     } catch (error) {
-      console.error("Erro ao carregar estatísticas:", error);
+      console.error('Erro ao carregar estatísticas:', error);
     } finally {
       setLoading(false);
     }
@@ -650,11 +653,14 @@ const AdminPanel = () => {
   const fetchCupcakes = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/admin/cupcakes`);
+      const user = JSON.parse(localStorage.getItem('user'));
+      const res = await fetch(`${API_BASE}/admin/cupcakes`, {
+        headers: { 'x-user-id': user?.id }
+      });
       const data = await res.json();
       setCupcakes(data);
     } catch (error) {
-      console.error("Erro ao carregar cupcakes:", error);
+      console.error('Erro ao carregar cupcakes:', error);
     } finally {
       setLoading(false);
     }
@@ -667,45 +673,45 @@ const AdminPanel = () => {
       const data = await res.json();
       setOrders(data);
     } catch (error) {
-      console.error("Erro ao carregar pedidos:", error);
+      console.error('Erro ao carregar pedidos:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteCupcake = async (id) => {
-    if (!window.confirm("Tem certeza que deseja deletar este cupcake?")) return;
+    if (!window.confirm('Tem certeza que deseja deletar este cupcake?')) return;
 
     try {
       const res = await fetch(`${API_BASE}/admin/cupcakes/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
       const result = await res.json();
-
+      
       if (result.success) {
-        showNotification("Cupcake deletado com sucesso!");
+        showNotification('Cupcake deletado com sucesso!');
         fetchCupcakes();
       }
     } catch (error) {
-      showNotification("Erro ao deletar cupcake", "error");
+      showNotification('Erro ao deletar cupcake', 'error');
     }
   };
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
       const res = await fetch(`${API_BASE}/admin/orders/${orderId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
       const result = await res.json();
-
+      
       if (result.success) {
-        showNotification("Status atualizado com sucesso!");
+        showNotification('Status atualizado com sucesso!');
         fetchOrders();
       }
     } catch (error) {
-      showNotification("Erro ao atualizar status", "error");
+      showNotification('Erro ao atualizar status', 'error');
     }
   };
 
@@ -713,98 +719,83 @@ const AdminPanel = () => {
     <>
       <style>{styles}</style>
       <div className="admin-container">
-        {notification && (
-          <div className={`admin-notification ${notification.type}`}>
-            {notification.message}
-          </div>
-        )}
+      {notification && (
+        <div className={`admin-notification ${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
 
-        <header className="admin-header">
-          <div className="container">
-            <h1>🧁 Painel Administrativo</h1>
-            <p>Gerencie cupcakes, pedidos e visualize estatísticas</p>
-          </div>
-        </header>
+      <header className="admin-header">
+        <div className="container">
+          <h1>🧁 Painel Administrativo</h1>
+          <p>Gerencie cupcakes, pedidos e visualize estatísticas</p>
+        </div>
+      </header>
 
-        <nav className="admin-nav">
-          <div className="container">
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              className={`admin-nav-button ${
-                activeTab === "dashboard" ? "active" : ""
-              }`}
-            >
-              📊 Dashboard
-            </button>
-            <button
-              onClick={() => setActiveTab("cupcakes")}
-              className={`admin-nav-button ${
-                activeTab === "cupcakes" ? "active" : ""
-              }`}
-            >
-              🧁 Cupcakes
-            </button>
-            <button
-              onClick={() => setActiveTab("orders")}
-              className={`admin-nav-button ${
-                activeTab === "orders" ? "active" : ""
-              }`}
-            >
-              📦 Pedidos
-            </button>
-          </div>
-        </nav>
+      <nav className="admin-nav">
+        <div className="container">
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`admin-nav-button ${activeTab === 'dashboard' ? 'active' : ''}`}
+          >
+            📊 Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab('cupcakes')}
+            className={`admin-nav-button ${activeTab === 'cupcakes' ? 'active' : ''}`}
+          >
+            🧁 Cupcakes
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`admin-nav-button ${activeTab === 'orders' ? 'active' : ''}`}
+          >
+            📦 Pedidos
+          </button>
+        </div>
+      </nav>
 
-        <main className="admin-main container">
-          {loading && (
-            <div className="loading">
-              <div className="spinner"></div>
-            </div>
-          )}
+      <main className="admin-main container">
+        {loading && <div className="loading"><div className="spinner"></div></div>}
 
-          {!loading && activeTab === "dashboard" && <Dashboard stats={stats} />}
-
-          {!loading && activeTab === "cupcakes" && (
-            <CupcakesTab
-              cupcakes={cupcakes}
-              onAdd={() => {
-                setEditingCupcake(null);
-                setShowCupcakeModal(true);
-              }}
-              onEdit={(cupcake) => {
-                setEditingCupcake(cupcake);
-                setShowCupcakeModal(true);
-              }}
-              onDelete={handleDeleteCupcake}
-            />
-          )}
-
-          {!loading && activeTab === "orders" && (
-            <OrdersTab
-              orders={orders}
-              onUpdateStatus={handleUpdateOrderStatus}
-            />
-          )}
-        </main>
-
-        {showCupcakeModal && (
-          <CupcakeModal
-            cupcake={editingCupcake}
-            onClose={() => {
-              setShowCupcakeModal(false);
+        {!loading && activeTab === 'dashboard' && <Dashboard stats={stats} />}
+        
+        {!loading && activeTab === 'cupcakes' && (
+          <CupcakesTab
+            cupcakes={cupcakes}
+            onAdd={() => {
               setEditingCupcake(null);
+              setShowCupcakeModal(true);
             }}
-            onSuccess={() => {
-              setShowCupcakeModal(false);
-              setEditingCupcake(null);
-              fetchCupcakes();
-              showNotification(
-                editingCupcake ? "Cupcake atualizado!" : "Cupcake criado!"
-              );
+            onEdit={(cupcake) => {
+              setEditingCupcake(cupcake);
+              setShowCupcakeModal(true);
             }}
+            onDelete={handleDeleteCupcake}
           />
         )}
-      </div>
+        
+        {!loading && activeTab === 'orders' && (
+          <OrdersTab orders={orders} onUpdateStatus={handleUpdateOrderStatus} />
+        )}
+      </main>
+
+      {showCupcakeModal && (
+        <CupcakeModal
+          cupcake={editingCupcake}
+          onClose={() => {
+            setShowCupcakeModal(false);
+            setEditingCupcake(null);
+          }}
+          onSuccess={() => {
+            setShowCupcakeModal(false);
+            setEditingCupcake(null);
+            fetchCupcakes();
+            showNotification(editingCupcake ? 'Cupcake atualizado!' : 'Cupcake criado!');
+          }}
+        />
+      )}
+    </div>
     </>
   );
 };
@@ -815,7 +806,7 @@ const Dashboard = ({ stats }) => {
   return (
     <div className="dashboard">
       <h2>Estatísticas Gerais</h2>
-
+      
       <div className="stats-grid">
         <div className="stat-card stat-blue">
           <div className="stat-icon">📦</div>
@@ -829,9 +820,7 @@ const Dashboard = ({ stats }) => {
           <div className="stat-icon">💰</div>
           <div className="stat-content">
             <div className="stat-label">Receita Total</div>
-            <div className="stat-value">
-              R$ {parseFloat(stats.totalRevenue).toFixed(2)}
-            </div>
+            <div className="stat-value">R$ {parseFloat(stats.totalRevenue).toFixed(2)}</div>
           </div>
         </div>
 
@@ -858,9 +847,7 @@ const Dashboard = ({ stats }) => {
           <div className="top-cupcake-icon">🧁</div>
           <div>
             <div className="top-cupcake-name">{stats.topCupcake.name}</div>
-            <div className="top-cupcake-sales">
-              {stats.topCupcake.total_sold} unidades vendidas
-            </div>
+            <div className="top-cupcake-sales">{stats.topCupcake.total_sold} unidades vendidas</div>
           </div>
         </div>
       </div>
@@ -887,39 +874,30 @@ const CupcakesTab = ({ cupcakes, onAdd, onEdit, onDelete }) => {
                   src={cupcake.image_url}
                   alt={cupcake.name}
                   onError={(e) => {
-                    e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "flex";
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
                   }}
                 />
               ) : null}
               <div className="admin-cupcake-fallback">🧁</div>
             </div>
-
+            
             <div className="admin-cupcake-content">
               <div className="admin-cupcake-header">
                 <h3>{cupcake.name}</h3>
-                <span
-                  className={`status-badge ${
-                    cupcake.available ? "status-active" : "status-inactive"
-                  }`}
-                >
-                  {cupcake.available ? "Ativo" : "Inativo"}
+                <span className={`status-badge ${cupcake.available ? 'status-active' : 'status-inactive'}`}>
+                  {cupcake.available ? 'Ativo' : 'Inativo'}
                 </span>
               </div>
-
+              
               <p className="admin-cupcake-description">{cupcake.description}</p>
-              <div className="admin-cupcake-price">
-                R$ {parseFloat(cupcake.price).toFixed(2)}
-              </div>
-
+              <div className="admin-cupcake-price">R$ {parseFloat(cupcake.price).toFixed(2)}</div>
+              
               <div className="admin-cupcake-actions">
                 <button onClick={() => onEdit(cupcake)} className="btn-edit">
                   ✏️ Editar
                 </button>
-                <button
-                  onClick={() => onDelete(cupcake.id)}
-                  className="btn-delete"
-                >
+                <button onClick={() => onDelete(cupcake.id)} className="btn-delete">
                   🗑️ Deletar
                 </button>
               </div>
@@ -934,10 +912,10 @@ const CupcakesTab = ({ cupcakes, onAdd, onEdit, onDelete }) => {
 const OrdersTab = ({ orders, onUpdateStatus }) => {
   const getStatusInfo = (status) => {
     const statuses = {
-      pending: { class: "status-pending", label: "⏳ Pendente" },
-      processing: { class: "status-processing", label: "🔄 Processando" },
-      completed: { class: "status-completed", label: "✅ Concluído" },
-      cancelled: { class: "status-cancelled", label: "❌ Cancelado" },
+      pending: { class: 'status-pending', label: '⏳ Pendente' },
+      processing: { class: 'status-processing', label: '🔄 Processando' },
+      completed: { class: 'status-completed', label: '✅ Concluído' },
+      cancelled: { class: 'status-cancelled', label: '❌ Cancelado' },
     };
     return statuses[status] || statuses.pending;
   };
@@ -967,15 +945,11 @@ const OrdersTab = ({ orders, onUpdateStatus }) => {
                   <td>
                     <div className="customer-info">
                       <div className="customer-name">{order.customer_name}</div>
-                      <div className="customer-email">
-                        {order.customer_email}
-                      </div>
+                      <div className="customer-email">{order.customer_email}</div>
                     </div>
                   </td>
-                  <td className="order-items">{order.items || "Sem itens"}</td>
-                  <td className="order-total">
-                    R$ {parseFloat(order.total_amount).toFixed(2)}
-                  </td>
+                  <td className="order-items">{order.items || 'Sem itens'}</td>
+                  <td className="order-total">R$ {parseFloat(order.total_amount).toFixed(2)}</td>
                   <td>
                     <span className={`status-badge ${statusInfo.class}`}>
                       {statusInfo.label}
@@ -1005,11 +979,11 @@ const OrdersTab = ({ orders, onUpdateStatus }) => {
 
 const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
-    name: cupcake?.name || "",
-    description: cupcake?.description || "",
-    price: cupcake?.price || "",
-    image_url: cupcake?.image_url || "",
-    category: cupcake?.category || "chocolate",
+    name: cupcake?.name || '',
+    description: cupcake?.description || '',
+    price: cupcake?.price || '',
+    image_url: cupcake?.image_url || '',
+    category: cupcake?.category || 'chocolate',
     available: cupcake?.available !== undefined ? cupcake.available : 1,
   });
   const [loading, setLoading] = useState(false);
@@ -1022,10 +996,10 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
       const url = cupcake
         ? `${API_BASE}/admin/cupcakes/${cupcake.id}`
         : `${API_BASE}/admin/cupcakes`;
-
+      
       const res = await fetch(url, {
-        method: cupcake ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
+        method: cupcake ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
@@ -1034,7 +1008,7 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
         onSuccess();
       }
     } catch (error) {
-      console.error("Erro ao salvar cupcake:", error);
+      console.error('Erro ao salvar cupcake:', error);
     } finally {
       setLoading(false);
     }
@@ -1045,10 +1019,8 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
       <div className="modal-overlay" onClick={onClose}></div>
       <div className="modal cupcake-modal">
         <div className="modal-header">
-          <h2>{cupcake ? "✏️ Editar Cupcake" : "➕ Novo Cupcake"}</h2>
-          <button onClick={onClose} className="close-button">
-            ✕
-          </button>
+          <h2>{cupcake ? '✏️ Editar Cupcake' : '➕ Novo Cupcake'}</h2>
+          <button onClick={onClose} className="close-button">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="cupcake-form">
@@ -1058,9 +1030,7 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
               type="text"
               required
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Ex: Cupcake de Chocolate"
             />
           </div>
@@ -1069,9 +1039,7 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
             <label>Descrição</label>
             <textarea
               value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Descrição do cupcake"
               rows="3"
             />
@@ -1085,9 +1053,7 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
                 step="0.01"
                 required
                 value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="8.50"
               />
             </div>
@@ -1096,9 +1062,7 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
               <label>Categoria</label>
               <select
                 value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               >
                 <option value="chocolate">Chocolate</option>
                 <option value="baunilha">Baunilha</option>
@@ -1114,9 +1078,7 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
             <input
               type="url"
               value={formData.image_url}
-              onChange={(e) =>
-                setFormData({ ...formData, image_url: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
               placeholder="https://..."
             />
           </div>
@@ -1126,12 +1088,7 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
               <input
                 type="checkbox"
                 checked={formData.available === 1}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    available: e.target.checked ? 1 : 0,
-                  })
-                }
+                onChange={(e) => setFormData({ ...formData, available: e.target.checked ? 1 : 0 })}
               />
               <span>Disponível para venda</span>
             </label>
@@ -1143,10 +1100,8 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
                 <div className="button-spinner"></div>
                 Salvando...
               </>
-            ) : cupcake ? (
-              "Atualizar Cupcake"
             ) : (
-              "Criar Cupcake"
+              cupcake ? 'Atualizar Cupcake' : 'Criar Cupcake'
             )}
           </button>
         </form>

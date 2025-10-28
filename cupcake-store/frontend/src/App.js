@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import AdminPanel from './AdminPanel'; // Importe o componente AdminPanel
+import React, { useState, useEffect } from "react";
+import AdminPanel from "./AdminPanel"; // Importe o componente AdminPanel
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = "http://localhost:3001/api";
 
 const Loading = () => (
   <div className="loading">
@@ -9,7 +9,17 @@ const Loading = () => (
   </div>
 );
 
-const Header = ({ cartItems, onCartClick, user, onLoginClick, onLogout, currentView, onViewChange, showAdmin, onAdminToggle }) => {
+const Header = ({
+  cartItems,
+  onCartClick,
+  user,
+  onLoginClick,
+  onLogout,
+  currentView,
+  onViewChange,
+  showAdmin,
+  onAdminToggle,
+}) => {
   const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
@@ -20,47 +30,61 @@ const Header = ({ cartItems, onCartClick, user, onLoginClick, onLogout, currentV
             <h1>🧁 Sweet Cupcakes</h1>
             <p>Os melhores cupcakes da cidade!</p>
           </div>
-          
+
           <div className="header-actions">
             {user ? (
               <div className="user-section">
                 <span className="user-greeting">Olá, {user.name}!</span>
-                <button onClick={onLogout} className="logout-button">Sair</button>
+                <button onClick={onLogout} className="logout-button">
+                  Sair
+                </button>
               </div>
             ) : (
-              <button onClick={onLoginClick} className="login-button">👤 Entrar</button>
+              <button onClick={onLoginClick} className="login-button">
+                👤 Entrar
+              </button>
             )}
-            
+
             {!showAdmin && (
               <>
-                <button 
-                  onClick={() => onViewChange('catalog')} 
-                  className={`nav-button ${currentView === 'catalog' ? 'active' : ''}`}
+                <button
+                  onClick={() => onViewChange("catalog")}
+                  className={`nav-button ${
+                    currentView === "catalog" ? "active" : ""
+                  }`}
                 >
                   🏠 Catálogo
                 </button>
 
                 {user && (
-                  <button 
-                    onClick={() => onViewChange('favorites')} 
-                    className={`nav-button ${currentView === 'favorites' ? 'active' : ''}`}
+                  <button
+                    onClick={() => onViewChange("favorites")}
+                    className={`nav-button ${
+                      currentView === "favorites" ? "active" : ""
+                    }`}
                   >
                     ❤️ Favoritos
                   </button>
                 )}
-                
+
                 <button onClick={onCartClick} className="cart-button">
                   🛒 <span>Carrinho</span>
-                  {itemCount > 0 && <span className="cart-badge">{itemCount}</span>}
+                  {itemCount > 0 && (
+                    <span className="cart-badge">{itemCount}</span>
+                  )}
                 </button>
               </>
             )}
 
             {/* Botão Admin - sempre visível */}
-            <button 
-              onClick={onAdminToggle} 
-              className={`nav-button ${showAdmin ? 'active' : ''}`}
-              style={{ background: showAdmin ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.1)' }}
+            <button
+              onClick={onAdminToggle}
+              className={`nav-button ${showAdmin ? "active" : ""}`}
+              style={{
+                background: showAdmin
+                  ? "rgba(255, 255, 255, 0.3)"
+                  : "rgba(255, 255, 255, 0.1)",
+              }}
             >
               ⚙️ Admin
             </button>
@@ -71,9 +95,15 @@ const Header = ({ cartItems, onCartClick, user, onLoginClick, onLogout, currentV
   );
 };
 
-const CupcakeCard = ({ cupcake, onAddToCart, isFavorite, onToggleFavorite, showFavoriteButton = true }) => {
+const CupcakeCard = ({
+  cupcake,
+  onAddToCart,
+  isFavorite,
+  onToggleFavorite,
+  showFavoriteButton = true,
+}) => {
   const [imageError, setImageError] = useState(false);
-  
+
   return (
     <div className="cupcake-card">
       <div className="card-image-container">
@@ -94,9 +124,9 @@ const CupcakeCard = ({ cupcake, onAddToCart, isFavorite, onToggleFavorite, showF
         {showFavoriteButton && (
           <button
             onClick={() => onToggleFavorite(cupcake.id)}
-            className={`like-button ${isFavorite ? 'liked' : ''}`}
+            className={`like-button ${isFavorite ? "liked" : ""}`}
           >
-            {isFavorite ? '❤️' : '🤍'}
+            {isFavorite ? "❤️" : "🤍"}
           </button>
         )}
         <div className="category-badge">{cupcake.category}</div>
@@ -105,16 +135,18 @@ const CupcakeCard = ({ cupcake, onAddToCart, isFavorite, onToggleFavorite, showF
       <div className="card-content">
         <h3 className="card-title">{cupcake.name}</h3>
         <p className="card-description">{cupcake.description}</p>
-        
+
         <div className="card-footer">
           <div className="price-section">
-            <span className="price">R$ {parseFloat(cupcake.price).toFixed(2)}</span>
+            <span className="price">
+              R$ {parseFloat(cupcake.price).toFixed(2)}
+            </span>
             <div className="rating">
               <span className="star">★★★★★</span>
               <span className="rating-text">(4.8)</span>
             </div>
           </div>
-          
+
           <button onClick={() => onAddToCart(cupcake)} className="add-button">
             ➕ Adicionar
           </button>
@@ -125,7 +157,10 @@ const CupcakeCard = ({ cupcake, onAddToCart, isFavorite, onToggleFavorite, showF
 };
 
 const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout }) => {
-  const total = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+  const total = cartItems.reduce(
+    (sum, item) => sum + parseFloat(item.price) * item.quantity,
+    0
+  );
 
   if (!isOpen) return null;
 
@@ -134,8 +169,13 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout }) => {
       <div className="cart-overlay" onClick={onClose}></div>
       <div className="cart-sidebar">
         <div className="cart-header">
-          <h2>Seu Carrinho ({cartItems.reduce((sum, item) => sum + item.quantity, 0)})</h2>
-          <button onClick={onClose} className="close-button">✕</button>
+          <h2>
+            Seu Carrinho (
+            {cartItems.reduce((sum, item) => sum + item.quantity, 0)})
+          </h2>
+          <button onClick={onClose} className="close-button">
+            ✕
+          </button>
         </div>
 
         <div className="cart-content">
@@ -148,21 +188,44 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout }) => {
           ) : (
             <>
               <div className="cart-items">
-                {cartItems.map(item => (
+                {cartItems.map((item) => (
                   <div key={item.id} className="cart-item">
                     <div className="cart-item-image-container">
-                      <img src={item.image_url} alt={item.name} className="cart-item-image" 
-                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+                      <img
+                        src={item.image_url}
+                        alt={item.name}
+                        className="cart-item-image"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          e.target.nextSibling.style.display = "flex";
+                        }}
+                      />
                       <div className="cart-image-fallback">🧁</div>
                     </div>
                     <div className="cart-item-info">
                       <h4>{item.name}</h4>
-                      <p className="cart-item-price">R$ {parseFloat(item.price).toFixed(2)}</p>
+                      <p className="cart-item-price">
+                        R$ {parseFloat(item.price).toFixed(2)}
+                      </p>
                     </div>
                     <div className="quantity-controls">
-                      <button onClick={() => onUpdateQuantity(item.id, item.quantity - 1)} className="quantity-button">➖</button>
+                      <button
+                        onClick={() =>
+                          onUpdateQuantity(item.id, item.quantity - 1)
+                        }
+                        className="quantity-button"
+                      >
+                        ➖
+                      </button>
                       <span className="quantity">{item.quantity}</span>
-                      <button onClick={() => onUpdateQuantity(item.id, item.quantity + 1)} className="quantity-button">➕</button>
+                      <button
+                        onClick={() =>
+                          onUpdateQuantity(item.id, item.quantity + 1)
+                        }
+                        className="quantity-button"
+                      >
+                        ➕
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -175,7 +238,9 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout }) => {
                 </div>
               </div>
 
-              <button onClick={onCheckout} className="checkout-button">Finalizar Pedido</button>
+              <button onClick={onCheckout} className="checkout-button">
+                Finalizar Pedido
+              </button>
             </>
           )}
         </div>
@@ -186,39 +251,48 @@ const Cart = ({ isOpen, onClose, cartItems, onUpdateQuantity, onCheckout }) => {
 
 const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
+    setError("");
 
     if (!isLogin) {
       if (formData.password !== formData.confirmPassword) {
-        setError('As senhas não coincidem');
+        setError("As senhas não coincidem");
         setIsSubmitting(false);
         return;
       }
       if (formData.password.length < 6) {
-        setError('A senha deve ter no mínimo 6 caracteres');
+        setError("A senha deve ter no mínimo 6 caracteres");
         setIsSubmitting(false);
         return;
       }
     }
 
     try {
-      const endpoint = isLogin ? '/auth/login' : '/auth/register';
-      const body = isLogin 
+      const endpoint = isLogin ? "/auth/login" : "/auth/register";
+      const body = isLogin
         ? { email: formData.email, password: formData.password }
-        : { name: formData.name, email: formData.email, password: formData.password };
+        : {
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+          };
 
       const response = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
 
@@ -226,13 +300,13 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
       if (response.ok && result.success) {
         onLoginSuccess(result.user);
-        setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+        setFormData({ name: "", email: "", password: "", confirmPassword: "" });
         onClose();
       } else {
-        setError(result.error || 'Erro ao processar solicitação');
+        setError(result.error || "Erro ao processar solicitação");
       }
     } catch (error) {
-      setError('Erro ao conectar com o servidor');
+      setError("Erro ao conectar com o servidor");
     } finally {
       setIsSubmitting(false);
     }
@@ -242,44 +316,106 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal auth-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>{isLogin ? 'Entrar' : 'Criar Conta'}</h2>
-          <button onClick={onClose} className="close-button">✕</button>
+          <h2>{isLogin ? "Entrar" : "Criar Conta"}</h2>
+          <button onClick={onClose} className="close-button">
+            ✕
+          </button>
         </div>
 
         <div className="auth-tabs">
-          <button className={`auth-tab ${isLogin ? 'active' : ''}`} onClick={() => { setIsLogin(true); setError(''); }}>Login</button>
-          <button className={`auth-tab ${!isLogin ? 'active' : ''}`} onClick={() => { setIsLogin(false); setError(''); }}>Cadastro</button>
+          <button
+            className={`auth-tab ${isLogin ? "active" : ""}`}
+            onClick={() => {
+              setIsLogin(true);
+              setError("");
+            }}
+          >
+            Login
+          </button>
+          <button
+            className={`auth-tab ${!isLogin ? "active" : ""}`}
+            onClick={() => {
+              setIsLogin(false);
+              setError("");
+            }}
+          >
+            Cadastro
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
           {!isLogin && (
             <div className="form-group">
               <label>Nome Completo *</label>
-              <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="Seu nome" />
+              <input
+                type="text"
+                required
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                placeholder="Seu nome"
+              />
             </div>
           )}
 
           <div className="form-group">
             <label>E-mail *</label>
-            <input type="email" required value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="seu@email.com" />
+            <input
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              placeholder="seu@email.com"
+            />
           </div>
 
           <div className="form-group">
             <label>Senha *</label>
-            <input type="password" required value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Mínimo 6 caracteres" />
+            <input
+              type="password"
+              required
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              placeholder="Mínimo 6 caracteres"
+            />
           </div>
 
           {!isLogin && (
             <div className="form-group">
               <label>Confirmar Senha *</label>
-              <input type="password" required value={formData.confirmPassword} onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} placeholder="Digite a senha novamente" />
+              <input
+                type="password"
+                required
+                value={formData.confirmPassword}
+                onChange={(e) =>
+                  setFormData({ ...formData, confirmPassword: e.target.value })
+                }
+                placeholder="Digite a senha novamente"
+              />
             </div>
           )}
 
           {error && <div className="error-message">⚠️ {error}</div>}
 
-          <button type="submit" disabled={isSubmitting} className="login-submit-button">
-            {isSubmitting ? <><div className="button-spinner"></div>Processando...</> : (isLogin ? 'Entrar' : 'Criar Conta')}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="login-submit-button"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="button-spinner"></div>Processando...
+              </>
+            ) : isLogin ? (
+              "Entrar"
+            ) : (
+              "Criar Conta"
+            )}
           </button>
         </form>
       </div>
@@ -287,34 +423,54 @@ const AuthModal = ({ isOpen, onClose, onLoginSuccess }) => {
   );
 };
 
-const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderComplete, user }) => {
-  const [formData, setFormData] = useState({ customerName: user?.name || '', customerEmail: user?.email || '', customerPhone: '' });
+const CheckoutModal = ({
+  isOpen,
+  onClose,
+  cartItems,
+  onOrderComplete,
+  user,
+}) => {
+  const [formData, setFormData] = useState({
+    customerName: user?.name || "",
+    customerEmail: user?.email || "",
+    customerPhone: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({ ...prev, customerName: user.name, customerEmail: user.email }));
+      setFormData((prev) => ({
+        ...prev,
+        customerName: user.name,
+        customerEmail: user.email,
+      }));
     }
   }, [user]);
 
-  const total = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+  const total = cartItems.reduce(
+    (sum, item) => sum + parseFloat(item.price) * item.quantity,
+    0
+  );
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
+    setError("");
 
     try {
       const response = await fetch(`${API_BASE}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: user?.id || null,
           ...formData,
-          items: cartItems.map(item => ({ cupcakeId: item.id, quantity: item.quantity }))
+          items: cartItems.map((item) => ({
+            cupcakeId: item.id,
+            quantity: item.quantity,
+          })),
         }),
       });
 
@@ -322,12 +478,12 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderComplete, user }) =>
 
       if (response.ok && result.success) {
         onOrderComplete(result);
-        setFormData({ customerName: '', customerEmail: '', customerPhone: '' });
+        setFormData({ customerName: "", customerEmail: "", customerPhone: "" });
       } else {
-        setError(result.error || 'Erro ao processar pedido');
+        setError(result.error || "Erro ao processar pedido");
       }
     } catch (error) {
-      setError('Erro ao conectar com o servidor');
+      setError("Erro ao conectar com o servidor");
     } finally {
       setIsSubmitting(false);
     }
@@ -335,24 +491,37 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderComplete, user }) =>
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal checkout-modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal checkout-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <h2>Finalizar Pedido</h2>
-          <button onClick={onClose} className="close-button">✕</button>
+          <button onClick={onClose} className="close-button">
+            ✕
+          </button>
         </div>
 
         <div className="checkout-content">
           <div className="order-summary">
             <h3>Resumo do Pedido:</h3>
-            {cartItems.map(item => (
+            {cartItems.map((item) => (
               <div key={item.id} className="summary-item">
-                <span>{item.name} x{item.quantity}</span>
-                <span>R$ {(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
+                <span>
+                  {item.name} x{item.quantity}
+                </span>
+                <span>
+                  R$ {(parseFloat(item.price) * item.quantity).toFixed(2)}
+                </span>
               </div>
             ))}
             <div className="summary-total">
-              <span><strong>Total:</strong></span>
-              <span><strong>R$ {total.toFixed(2)}</strong></span>
+              <span>
+                <strong>Total:</strong>
+              </span>
+              <span>
+                <strong>R$ {total.toFixed(2)}</strong>
+              </span>
             </div>
           </div>
 
@@ -361,21 +530,56 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onOrderComplete, user }) =>
           <form onSubmit={handleSubmit} className="checkout-form">
             <div className="form-group">
               <label>Nome Completo *</label>
-              <input type="text" required value={formData.customerName} onChange={(e) => setFormData({...formData, customerName: e.target.value})} placeholder="Seu nome completo" disabled={!!user} />
+              <input
+                type="text"
+                required
+                value={formData.customerName}
+                onChange={(e) =>
+                  setFormData({ ...formData, customerName: e.target.value })
+                }
+                placeholder="Seu nome completo"
+                disabled={!!user}
+              />
             </div>
 
             <div className="form-group">
               <label>E-mail *</label>
-              <input type="email" required value={formData.customerEmail} onChange={(e) => setFormData({...formData, customerEmail: e.target.value})} placeholder="seu@email.com" disabled={!!user} />
+              <input
+                type="email"
+                required
+                value={formData.customerEmail}
+                onChange={(e) =>
+                  setFormData({ ...formData, customerEmail: e.target.value })
+                }
+                placeholder="seu@email.com"
+                disabled={!!user}
+              />
             </div>
 
             <div className="form-group">
               <label>Telefone</label>
-              <input type="tel" value={formData.customerPhone} onChange={(e) => setFormData({...formData, customerPhone: e.target.value})} placeholder="(11) 99999-9999" />
+              <input
+                type="tel"
+                value={formData.customerPhone}
+                onChange={(e) =>
+                  setFormData({ ...formData, customerPhone: e.target.value })
+                }
+                placeholder="(11) 99999-9999"
+              />
             </div>
 
-            <button type="submit" disabled={isSubmitting} className="checkout-submit-button">
-              {isSubmitting ? <><div className="button-spinner"></div>Processando...</> : `Confirmar Pedido - R$ ${total.toFixed(2)}`}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="checkout-submit-button"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="button-spinner"></div>Processando...
+                </>
+              ) : (
+                `Confirmar Pedido - R$ ${total.toFixed(2)}`
+              )}
             </button>
           </form>
         </div>
@@ -396,21 +600,35 @@ const App = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(null);
-  const [currentView, setCurrentView] = useState('catalog');
+  const [currentView, setCurrentView] = useState("catalog");
   const [showAdmin, setShowAdmin] = useState(false); // NOVO: controla visualização admin
+  const [isAdmin, setIsAdmin] = useState(false); // NOVO: verifica se usuário é admin
 
   useEffect(() => {
     fetchCupcakes();
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem("user");
     if (savedUser) {
       const userData = JSON.parse(savedUser);
       setUser(userData);
       loadFavorites(userData.id);
+      checkAdminRole(userData.id);
     }
   }, []);
 
+  // NOVO: Verificar se usuário é admin
+  const checkAdminRole = async (userId) => {
+    try {
+      const response = await fetch(`${API_BASE}/auth/check-admin/${userId}`);
+      const data = await response.json();
+      setIsAdmin(data.isAdmin);
+    } catch (error) {
+      console.error("Erro ao verificar permissões:", error);
+      setIsAdmin(false);
+    }
+  };
+
   useEffect(() => {
-    if (currentView === 'favorites' && user) {
+    if (currentView === "favorites" && user) {
       fetchFavoriteCupcakes();
     }
   }, [currentView, user]);
@@ -419,11 +637,13 @@ const App = () => {
     try {
       setError(null);
       const response = await fetch(`${API_BASE}/cupcakes`);
-      if (!response.ok) throw new Error('Erro ao carregar cupcakes');
+      if (!response.ok) throw new Error("Erro ao carregar cupcakes");
       const data = await response.json();
       setCupcakes(data);
     } catch (error) {
-      setError('Erro ao conectar com o servidor. Verifique se o backend está rodando na porta 3001.');
+      setError(
+        "Erro ao conectar com o servidor. Verifique se o backend está rodando na porta 3001."
+      );
     } finally {
       setLoading(false);
     }
@@ -437,13 +657,13 @@ const App = () => {
         setFavorites(ids);
       }
     } catch (error) {
-      console.error('Erro ao carregar favoritos:', error);
+      console.error("Erro ao carregar favoritos:", error);
     }
   };
 
   const fetchFavoriteCupcakes = async () => {
     if (!user) return;
-    
+
     try {
       const response = await fetch(`${API_BASE}/favorites/${user.id}`);
       if (response.ok) {
@@ -451,15 +671,19 @@ const App = () => {
         setFavoriteCupcakes(data);
       }
     } catch (error) {
-      console.error('Erro ao carregar cupcakes favoritos:', error);
+      console.error("Erro ao carregar cupcakes favoritos:", error);
     }
   };
 
   const addToCart = (cupcake) => {
-    setCartItems(prev => {
-      const existing = prev.find(item => item.id === cupcake.id);
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === cupcake.id);
       if (existing) {
-        return prev.map(item => item.id === cupcake.id ? { ...item, quantity: item.quantity + 1 } : item);
+        return prev.map((item) =>
+          item.id === cupcake.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
       }
       return [...prev, { ...cupcake, quantity: 1 }];
     });
@@ -467,9 +691,13 @@ const App = () => {
 
   const updateQuantity = (id, newQuantity) => {
     if (newQuantity <= 0) {
-      setCartItems(prev => prev.filter(item => item.id !== id));
+      setCartItems((prev) => prev.filter((item) => item.id !== id));
     } else {
-      setCartItems(prev => prev.map(item => item.id === id ? { ...item, quantity: newQuantity } : item));
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, quantity: newQuantity } : item
+        )
+      );
     }
   };
 
@@ -483,35 +711,40 @@ const App = () => {
 
     try {
       if (isFavorite) {
-        const response = await fetch(`${API_BASE}/favorites/${user.id}/${cupcakeId}`, {
-          method: 'DELETE',
-        });
+        const response = await fetch(
+          `${API_BASE}/favorites/${user.id}/${cupcakeId}`,
+          {
+            method: "DELETE",
+          }
+        );
 
         if (response.ok) {
-          setFavorites(prev => prev.filter(id => id !== cupcakeId));
-          if (currentView === 'favorites') {
-            setFavoriteCupcakes(prev => prev.filter(c => c.id !== cupcakeId));
+          setFavorites((prev) => prev.filter((id) => id !== cupcakeId));
+          if (currentView === "favorites") {
+            setFavoriteCupcakes((prev) =>
+              prev.filter((c) => c.id !== cupcakeId)
+            );
           }
         }
       } else {
         const response = await fetch(`${API_BASE}/favorites`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: user.id, cupcakeId }),
         });
 
         if (response.ok) {
-          setFavorites(prev => [...prev, cupcakeId]);
+          setFavorites((prev) => [...prev, cupcakeId]);
         }
       }
     } catch (error) {
-      console.error('Erro ao atualizar favoritos:', error);
+      console.error("Erro ao atualizar favoritos:", error);
     }
   };
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(userData));
     loadFavorites(userData.id);
     setShowAuth(false);
   };
@@ -520,9 +753,9 @@ const App = () => {
     setUser(null);
     setFavorites([]);
     setFavoriteCupcakes([]);
-    setCurrentView('catalog');
+    setCurrentView("catalog");
     setShowAdmin(false); // Sair do admin ao fazer logout
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
   };
 
   const handleCheckout = () => {
@@ -547,7 +780,15 @@ const App = () => {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f9fafb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#f9fafb",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Loading />
       </div>
     );
@@ -568,12 +809,12 @@ const App = () => {
   // NOVO: Renderiza o painel admin se showAdmin for true
   if (showAdmin) {
     return (
-      <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
-        <Header 
-          cartItems={cartItems} 
-          onCartClick={() => setShowCart(true)} 
-          user={user} 
-          onLoginClick={() => setShowAuth(true)} 
+      <div style={{ minHeight: "100vh", background: "#f9fafb" }}>
+        <Header
+          cartItems={cartItems}
+          onCartClick={() => setShowCart(true)}
+          user={user}
+          onLoginClick={() => setShowAuth(true)}
           onLogout={handleLogout}
           currentView={currentView}
           onViewChange={setCurrentView}
@@ -587,12 +828,12 @@ const App = () => {
 
   // Renderiza a loja normal
   return (
-    <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
-      <Header 
-        cartItems={cartItems} 
-        onCartClick={() => setShowCart(true)} 
-        user={user} 
-        onLoginClick={() => setShowAuth(true)} 
+    <div style={{ minHeight: "100vh", background: "#f9fafb" }}>
+      <Header
+        cartItems={cartItems}
+        onCartClick={() => setShowCart(true)}
+        user={user}
+        onLoginClick={() => setShowAuth(true)}
         onLogout={handleLogout}
         currentView={currentView}
         onViewChange={setCurrentView}
@@ -602,32 +843,45 @@ const App = () => {
 
       {orderSuccess && (
         <div className="success-banner">
-          <p><strong>🎉 Pedido #{orderSuccess.orderId} criado com sucesso!</strong></p>
-          <p>Total: R$ {orderSuccess.total.toFixed(2)} - Entraremos em contato em breve!</p>
+          <p>
+            <strong>
+              🎉 Pedido #{orderSuccess.orderId} criado com sucesso!
+            </strong>
+          </p>
+          <p>
+            Total: R$ {orderSuccess.total.toFixed(2)} - Entraremos em contato em
+            breve!
+          </p>
         </div>
       )}
 
       <main className="container main-content">
-        {currentView === 'catalog' ? (
+        {currentView === "catalog" ? (
           <>
             <div className="hero">
               <h2>Nossos Cupcakes</h2>
-              <p>Descubra nossa incrível seleção de cupcakes artesanais, feitos com amor e os melhores ingredientes. Cada mordida é uma explosão de sabor que vai deixar você querendo mais!</p>
+              <p>
+                Descubra nossa incrível seleção de cupcakes artesanais, feitos
+                com amor e os melhores ingredientes. Cada mordida é uma explosão
+                de sabor que vai deixar você querendo mais!
+              </p>
             </div>
 
             {cupcakes.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                <p style={{ color: '#6b7280' }}>Nenhum cupcake disponível no momento.</p>
+              <div style={{ textAlign: "center", padding: "2rem 0" }}>
+                <p style={{ color: "#6b7280" }}>
+                  Nenhum cupcake disponível no momento.
+                </p>
               </div>
             ) : (
               <div className="cupcakes-grid">
-                {cupcakes.map(cupcake => (
-                  <CupcakeCard 
-                    key={cupcake.id} 
-                    cupcake={cupcake} 
-                    onAddToCart={addToCart} 
-                    isFavorite={favorites.includes(cupcake.id)} 
-                    onToggleFavorite={toggleFavorite} 
+                {cupcakes.map((cupcake) => (
+                  <CupcakeCard
+                    key={cupcake.id}
+                    cupcake={cupcake}
+                    onAddToCart={addToCart}
+                    isFavorite={favorites.includes(cupcake.id)}
+                    onToggleFavorite={toggleFavorite}
                   />
                 ))}
               </div>
@@ -644,20 +898,26 @@ const App = () => {
               <div className="empty-favorites">
                 <div className="empty-icon">💔</div>
                 <h3>Nenhum favorito ainda</h3>
-                <p>Clique no coração dos cupcakes que você ama para salvá-los aqui!</p>
-                <button onClick={() => setCurrentView('catalog')} className="back-button">
+                <p>
+                  Clique no coração dos cupcakes que você ama para salvá-los
+                  aqui!
+                </p>
+                <button
+                  onClick={() => setCurrentView("catalog")}
+                  className="back-button"
+                >
                   🏠 Ir para o Catálogo
                 </button>
               </div>
             ) : (
               <div className="cupcakes-grid">
-                {favoriteCupcakes.map(cupcake => (
-                  <CupcakeCard 
-                    key={cupcake.id} 
-                    cupcake={cupcake} 
-                    onAddToCart={addToCart} 
-                    isFavorite={true} 
-                    onToggleFavorite={toggleFavorite} 
+                {favoriteCupcakes.map((cupcake) => (
+                  <CupcakeCard
+                    key={cupcake.id}
+                    cupcake={cupcake}
+                    onAddToCart={addToCart}
+                    isFavorite={true}
+                    onToggleFavorite={toggleFavorite}
                   />
                 ))}
               </div>
@@ -682,7 +942,11 @@ const App = () => {
             <div className="contact-item">
               <div className="contact-icon">📍</div>
               <h4>Endereço</h4>
-              <p>Rua dos Doces, 123<br />São Paulo, SP</p>
+              <p>
+                Rua dos Doces, 123
+                <br />
+                São Paulo, SP
+              </p>
             </div>
           </div>
         </div>
@@ -691,16 +955,39 @@ const App = () => {
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
-            <div className="footer-brand"><h4>🧁 Sweet Cupcakes</h4></div>
-            <p>Os melhores cupcakes artesanais da cidade, feitos com amor desde 2024.</p>
-            <p className="footer-copy">© 2024 Sweet Cupcakes. Todos os direitos reservados.</p>
+            <div className="footer-brand">
+              <h4>🧁 Sweet Cupcakes</h4>
+            </div>
+            <p>
+              Os melhores cupcakes artesanais da cidade, feitos com amor desde
+              2024.
+            </p>
+            <p className="footer-copy">
+              © 2024 Sweet Cupcakes. Todos os direitos reservados.
+            </p>
           </div>
         </div>
       </footer>
 
-      <Cart isOpen={showCart} onClose={() => setShowCart(false)} cartItems={cartItems} onUpdateQuantity={updateQuantity} onCheckout={handleCheckout} />
-      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} onLoginSuccess={handleLoginSuccess} />
-      <CheckoutModal isOpen={showCheckout} onClose={() => setShowCheckout(false)} cartItems={cartItems} onOrderComplete={handleOrderComplete} user={user} />
+      <Cart
+        isOpen={showCart}
+        onClose={() => setShowCart(false)}
+        cartItems={cartItems}
+        onUpdateQuantity={updateQuantity}
+        onCheckout={handleCheckout}
+      />
+      <AuthModal
+        isOpen={showAuth}
+        onClose={() => setShowAuth(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+      <CheckoutModal
+        isOpen={showCheckout}
+        onClose={() => setShowCheckout(false)}
+        cartItems={cartItems}
+        onOrderComplete={handleOrderComplete}
+        user={user}
+      />
     </div>
   );
 };

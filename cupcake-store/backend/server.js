@@ -693,3 +693,342 @@ process.on("SIGINT", () => {
     process.exit(0);
   });
 });
+
+db.run(`CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  role TEXT DEFAULT 'user' CHECK(role IN ('user', 'admin')),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
+
+// 2. CRIAR UM USUÁRIO ADMIN PADRÃO (adicione após a criação das tabelas)
+db.get("SELECT COUNT(*) as count FROM users WHERE role = 'admin'", (err, row) => {
+  if (!err && row.count === 0) {
+    bcrypt.hash('admin123', 10, (err, hash) => {
+      if (!err) {
+        db.run(
+          "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
+          ['Administrador', 'admin@sweetcupcakes.com', hash, 'admin'],
+          () => {
+            console.log('👤 Usuário admin criado:');
+            console.log('   Email: admin@sweetcupcakes.com');
+            console.log('   Senha: admin123');
+            console.log('   ⚠️  ALTERE A SENHA EM PRODUÇÃO!');
+          }
+        );
+      }
+    });
+  }
+});
+
+// 3. MIDDLEWARE DE AUTENTICAÇÃO (adicione antes das rotas admin)
+const authMiddleware = (req, res, next) => {
+  const userId = req.headers['x-user-id'];
+  
+  if (!userId) {
+    return res.status(401).json({ error: 'Autenticação necessária' });
+  }
+
+  db.get('SELECT id, role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err || !user) {
+      return res.status(401).json({ error: 'Usuário não encontrado' });
+    }
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({ error: 'Acesso negado. Apenas administradores.' });
+    }
+
+    req.user = user;
+    next();
+  });
+};
+
+// 4. ATUALIZAR ROTA DE LOGIN (substituir a existente)
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+  }
+
+  db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro ao buscar usuário' });
+    }
+
+    if (!user) {
+      return res.status(401).json({ error: 'Email ou senha incorretos' });
+    }
+
+    try {
+      const passwordMatch = await bcrypt.compare(password, user.password);
+
+      if (!passwordMatch) {
+        return res.status(401).json({ error: 'Email ou senha incorretos' });
+      }
+
+      console.log('✅ Login bem-sucedido:', user.name, `(${user.role})`);
+      res.json({
+        success: true,
+        user: { 
+          id: user.id, 
+          name: user.name, 
+          email: user.email,
+          role: user.role // NOVO: retorna o role
+        },
+        message: 'Login realizado com sucesso!'
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao verificar senha' });
+    }
+  });
+});
+
+// 5. ATUALIZAR ROTA DE REGISTRO (substituir a existente)
+app.post('/api/auth/register', async (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'A senha deve ter no mínimo 6 caracteres' });
+  }
+
+  db.get('SELECT id FROM users WHERE email = ?', [email], async (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: 'Erro ao verificar email' });
+    }
+
+    if (row) {
+      return res.status(400).json({ error: 'Este email já está cadastrado' });
+    }
+
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      db.run(
+        'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+        [name, email, hashedPassword, 'user'], // SEMPRE cria como 'user'
+        function(err) {
+          if (err) {
+            return res.status(500).json({ error: 'Erro ao criar usuário' });
+          }
+
+          console.log('✅ Usuário criado:', name, '(user)');
+          res.json({
+            success: true,
+            user: { id: this.lastID, name, email, role: 'user' },
+            message: 'Usuário cadastrado com sucesso!'
+          });
+        }
+      );
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao processar senha' });
+    }
+  });
+});
+
+// 6. ROTA PARA VERIFICAR PERMISSÃO DE ADMIN (NOVA)
+app.get('/api/auth/check-admin/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err || !user) {
+      return res.status(404).json({ isAdmin: false, error: 'Usuário não encontrado' });
+    }
+
+    res.json({ isAdmin: user.role === 'admin' });
+  });
+});
+
+// 7. PROTEGER TODAS AS ROTAS ADMIN COM O MIDDLEWARE
+// Substitua as rotas admin existentes por estas versões protegidas:
+
+app.post('/api/admin/cupcakes', authMiddleware, (req, res) => {
+  const { name, description, price, image_url, category } = req.body;
+
+  if (!name || !price) {
+    return res.status(400).json({ error: 'Nome e preço são obrigatórios' });
+  }
+
+  db.run(
+    'INSERT INTO cupcakes (name, description, price, image_url, category) VALUES (?, ?, ?, ?, ?)',
+    [name, description || '', price, image_url || '', category || 'outros'],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      console.log('✅ Cupcake criado:', name, `by admin ${req.user.id}`);
+      res.json({
+        success: true,
+        cupcake: { id: this.lastID, name, description, price, image_url, category },
+        message: 'Cupcake criado com sucesso!'
+      });
+    }
+  );
+});
+
+app.put('/api/admin/cupcakes/:id', authMiddleware, (req, res) => {
+  const { id } = req.params;
+  const { name, description, price, image_url, category, available } = req.body;
+
+  if (!name || !price) {
+    return res.status(400).json({ error: 'Nome e preço são obrigatórios' });
+  }
+
+  db.run(
+    'UPDATE cupcakes SET name = ?, description = ?, price = ?, image_url = ?, category = ?, available = ? WHERE id = ?',
+    [name, description || '', price, image_url || '', category || 'outros', available !== undefined ? available : 1, id],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Cupcake não encontrado' });
+      }
+
+      console.log('✏️ Cupcake atualizado:', name, `by admin ${req.user.id}`);
+      res.json({
+        success: true,
+        message: 'Cupcake atualizado com sucesso!'
+      });
+    }
+  );
+});
+
+app.delete('/api/admin/cupcakes/:id', authMiddleware, (req, res) => {
+  const { id } = req.params;
+
+  db.run('DELETE FROM cupcakes WHERE id = ?', [id], function(err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: 'Cupcake não encontrado' });
+    }
+
+    console.log('🗑️ Cupcake deletado:', id, `by admin ${req.user.id}`);
+    res.json({
+      success: true,
+      message: 'Cupcake deletado com sucesso!'
+    });
+  });
+});
+
+app.get('/api/admin/cupcakes', authMiddleware, (req, res) => {
+  db.all("SELECT * FROM cupcakes ORDER BY created_at DESC", (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
+app.put('/api/admin/orders/:id', authMiddleware, (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ error: 'Status inválido' });
+  }
+
+  db.run(
+    'UPDATE orders SET status = ? WHERE id = ?',
+    [status, id],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Pedido não encontrado' });
+      }
+
+      console.log('📦 Status do pedido atualizado:', id, status, `by admin ${req.user.id}`);
+      res.json({
+        success: true,
+        message: 'Status atualizado com sucesso!'
+      });
+    }
+  );
+});
+
+app.get('/api/admin/orders/:id', authMiddleware, (req, res) => {
+  const { id } = req.params;
+
+  db.get(
+    `SELECT o.*, 
+            json_group_array(
+              json_object(
+                'cupcake_name', c.name,
+                'quantity', oi.quantity,
+                'unit_price', oi.unit_price
+              )
+            ) as items
+     FROM orders o
+     LEFT JOIN order_items oi ON o.id = oi.order_id
+     LEFT JOIN cupcakes c ON oi.cupcake_id = c.id
+     WHERE o.id = ?
+     GROUP BY o.id`,
+    [id],
+    (err, row) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      if (!row) {
+        return res.status(404).json({ error: 'Pedido não encontrado' });
+      }
+
+      row.items = JSON.parse(row.items);
+      res.json(row);
+    }
+  );
+});
+
+app.get('/api/admin/stats', authMiddleware, (req, res) => {
+  const stats = {};
+
+  db.get('SELECT COUNT(*) as total FROM orders', (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    stats.totalOrders = row.total;
+
+    db.get('SELECT SUM(total_amount) as revenue FROM orders WHERE status != "cancelled"', (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+      stats.totalRevenue = row.revenue || 0;
+
+      db.get('SELECT COUNT(*) as total FROM cupcakes WHERE available = 1', (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        stats.totalCupcakes = row.total;
+
+        db.get('SELECT COUNT(*) as total FROM orders WHERE status = "pending"', (err, row) => {
+          if (err) return res.status(500).json({ error: err.message });
+          stats.pendingOrders = row.total;
+
+          db.get(
+            `SELECT c.name, SUM(oi.quantity) as total_sold
+             FROM order_items oi
+             JOIN cupcakes c ON oi.cupcake_id = c.id
+             GROUP BY oi.cupcake_id
+             ORDER BY total_sold DESC
+             LIMIT 1`,
+            (err, row) => {
+              if (err) return res.status(500).json({ error: err.message });
+              stats.topCupcake = row || { name: 'N/A', total_sold: 0 };
+
+              res.json(stats);
+            }
+          );
+        });
+      });
+    });
+  });
+});
