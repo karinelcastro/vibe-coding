@@ -28,8 +28,8 @@ const Header = ({
       <div className="container">
         <div className="header-content">
           <div>
-            <h1>🧁 Sweet Cupcakes</h1>
-            <p>Os melhores cupcakes da cidade!</p>
+            <h1>🧁 Kastro's Cupcakes</h1>
+            <p> Os melhores cupcakes da cidade!</p>
           </div>
 
           <div className="header-actions">
@@ -40,12 +40,12 @@ const Header = ({
                   {isAdmin && <span className="admin-badge">ADMIN</span>}
                 </span>
                 <button onClick={onLogout} className="logout-button">
-                  Sair
+                Sair
                 </button>
               </div>
             ) : (
               <button onClick={onLoginClick} className="login-button">
-                👤 Entrar
+                Entrar
               </button>
             )}
 
@@ -57,7 +57,7 @@ const Header = ({
                     currentView === "catalog" ? "active" : ""
                   }`}
                 >
-                  🏠 Catálogo
+                  Catálogo
                 </button>
 
                 {user && (
@@ -72,7 +72,7 @@ const Header = ({
                 )}
 
                 <button onClick={onCartClick} className="cart-button">
-                  🛒 <span>Carrinho</span>
+                  <span>Carrinho</span>
                   {itemCount > 0 && (
                     <span className="cart-badge">{itemCount}</span>
                   )}
@@ -922,7 +922,7 @@ const App = () => {
             <div className="contact-item">
               <div className="contact-icon">📞</div>
               <h4>Telefone</h4>
-              <p>(11) 99999-9999</p>
+              <p>(64) 99999-9999</p>
             </div>
             <div className="contact-item">
               <div className="contact-icon">✉️</div>
@@ -933,9 +933,9 @@ const App = () => {
               <div className="contact-icon">📍</div>
               <h4>Endereço</h4>
               <p>
-                Rua dos Doces, 123
+                Rua Egerineu Rocha
                 <br />
-                São Paulo, SP
+                Orizona, GO
               </p>
             </div>
           </div>
@@ -946,14 +946,14 @@ const App = () => {
         <div className="container">
           <div className="footer-content">
             <div className="footer-brand">
-              <h4>🧁 Sweet Cupcakes</h4>
+              <h4>🧁 Kastro's Cupcakes</h4>
             </div>
             <p>
               Os melhores cupcakes artesanais da cidade, feitos com amor desde
-              2024.
+              2025.
             </p>
             <p className="footer-copy">
-              © 2024 Sweet Cupcakes. Todos os direitos reservados.
+              © 2025 Kastro's Cupcakes. Todos os direitos reservados.
             </p>
           </div>
         </div>
