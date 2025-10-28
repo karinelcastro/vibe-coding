@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @import "adminPanel.css";
 
 * {
@@ -8,7 +8,7 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #f9fafb;
@@ -20,9 +20,83 @@ body {
   padding: 0 1rem;
 }
 
+/* Adicione estes estilos ao seu index.css existente */
+
+/* Badge de Admin no Header */
+.admin-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #78350f;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  margin-left: 0.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+/* Botão Admin no Header */
+.admin-nav-button {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+}
+
+.admin-nav-button:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.admin-nav-button.active {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Melhorias no User Section */
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+}
+
+.user-greeting {
+  display: flex;
+  align-items: center;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .admin-badge {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.25rem;
+    width: fit-content;
+  }
+
+  .user-section {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .user-greeting {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* Header Styles */
 .header {
-  background: linear-gradient(to right, #ec4899, #a855f7);
+  background: linear-gradient(to right, #812654, #a855f7);
   color: white;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   position: sticky;
@@ -97,7 +171,7 @@ body {
 }
 
 .cart-button:hover {
-  background: rgba(255, 255, 255, 0.);
+  background: rgba(255, 255, 255, 0);
   transform: scale(1.05);
 }
 
@@ -190,8 +264,12 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error */
@@ -252,7 +330,8 @@ body {
 }
 
 .cupcake-card:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   transform: translateY(-2px);
 }
 
@@ -820,35 +899,35 @@ body {
     gap: 1rem;
     text-align: center;
   }
-  
+
   .header-actions {
     width: 100%;
     justify-content: center;
   }
-  
+
   .hero h2 {
     font-size: 2rem;
   }
-  
+
   .cupcakes-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .cart-sidebar {
     max-width: 100%;
   }
-  
+
   .contact-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-  
+
   .card-footer {
     flex-direction: column;
     gap: 0.75rem;
     align-items: stretch;
   }
-  
+
   .add-button {
     text-align: center;
   }
@@ -958,17 +1037,17 @@ body {
     margin: 1rem;
     max-width: calc(100% - 2rem);
   }
-  
+
   .cart-sidebar {
     max-width: 100%;
   }
-  
+
   .header-content {
     flex-direction: column;
     gap: 1rem;
     text-align: center;
   }
-  
+
   .header-actions {
     width: 100%;
     justify-content: center;
@@ -1031,7 +1110,7 @@ body {
 }
 
 .auth-tab.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -1095,7 +1174,7 @@ body {
 }
 
 .auth-tab.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -1198,7 +1277,7 @@ body {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   .nav-button {
     font-size: 0.75rem;
     padding: 0.4rem 0.75rem;
