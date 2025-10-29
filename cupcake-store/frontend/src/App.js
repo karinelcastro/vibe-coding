@@ -40,7 +40,7 @@ const Header = ({
                   {isAdmin && <span className="admin-badge">ADMIN</span>}
                 </span>
                 <button onClick={onLogout} className="logout-button">
-                Sair
+                  Sair
                 </button>
               </div>
             ) : (
@@ -927,7 +927,7 @@ const App = () => {
             <div className="contact-item">
               <div className="contact-icon">✉️</div>
               <h4>E-mail</h4>
-              <p>contato@kastroscupcakes.com</p>
+              <p>contato@sweetcupcakes.com</p>
             </div>
             <div className="contact-item">
               <div className="contact-icon">📍</div>

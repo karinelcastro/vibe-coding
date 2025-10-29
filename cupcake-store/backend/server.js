@@ -24,7 +24,7 @@ db.serialize(() => {
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT DEFAULT 'user' CHECK(role IN ('user', 'admin')),
+    role TEXT DEFAULT 'user',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
@@ -84,19 +84,41 @@ db.serialize(() => {
       );
 
       const cupcakes = [
-        ["Cupcake de Chocolate", "Delicioso cupcake de chocolate com cobertura cremosa", 8.5, "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?w=400&h=300&fit=crop", "chocolate"],
-        ["Cupcake de Baunilha", "Cupcake clássico de baunilha com buttercream", 7.5, "https://images.unsplash.com/photo-1426869884541-df7117556757?w=400&h=300&fit=crop", "baunilha"],
-        ["Cupcake Red Velvet", "O famoso red velvet com cream cheese", 9.5, "https://images.unsplash.com/photo-1614707267537-b85aaf00c4b7?w=400&h=300&fit=crop", "especial"],
-        ["Cupcake de Morango", "Cupcake de morango com pedaços da fruta", 8.0, "https://images.unsplash.com/photo-1519915212116-7cfef71f1d3e?w=400&h=300&fit=crop", "frutas"],
-        ["Cupcake de Limão", "Refrescante cupcake de limão com cobertura cítrica", 8.0, "https://images.unsplash.com/photo-1599785209707-a456fc1337bb?w=400&h=300&fit=crop", "frutas"],
-        ["Cupcake de Nutella", "Irresistível cupcake recheado com Nutella", 10.0, "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=400&h=300&fit=crop", "especial"],
+        ["Cupcake de Chocolate", "Delicioso cupcake de chocolate com cobertura cremosa", 8.5, "/images/cupcakes/chocolate.jpg", "chocolate"],
+        ["Cupcake de Baunilha", "Cupcake clássico de baunilha com buttercream", 7.5, "/images/cupcakes/baunilha.jpg", "baunilha"],
+        ["Cupcake Red Velvet", "O famoso red velvet com cream cheese", 9.5, "/images/cupcakes/red-velvet.jpg", "especial"],
+        ["Cupcake de Morango", "Cupcake de morango com pedaços da fruta", 8.0, "/images/cupcakes/morango.jpg", "frutas"],
+        ["Cupcake de Limão", "Refrescante cupcake de limão com cobertura cítrica", 8.0, "/images/cupcakes/limao.jpg", "frutas"],
+        ["Cupcake de Nutella", "Irresistível cupcake recheado com Nutella", 10.0, "/images/cupcakes/nutella.jpg", "especial"],
       ];
 
       cupcakes.forEach((cupcake) => {
         insert.run(cupcake);
       });
       insert.finalize();
-      console.log("✅ Cupcakes inseridos!");
+      console.log("✅ Cupcakes inseridos com imagens locais!");
+    } else {
+      // 🔄 ATUALIZAR PARA IMAGENS LOCAIS
+      console.log("🔄 Atualizando para imagens locais...");
+      
+      const updateImages = [
+        { id: 1, image: "/images/cupcakes/chocolate.jpg" },
+        { id: 2, image: "/images/cupcakes/baunilha.jpg" },
+        { id: 3, image: "/images/cupcakes/red-velvet.jpg" },
+        { id: 4, image: "/images/cupcakes/morango.jpg" },
+        { id: 5, image: "/images/cupcakes/limao.jpg" },
+        { id: 6, image: "/images/cupcakes/nutella.jpg" },
+      ];
+
+      const updateStmt = db.prepare("UPDATE cupcakes SET image_url = ? WHERE id = ?");
+      
+      updateImages.forEach(({ id, image }) => {
+        updateStmt.run([image, id], (err) => {
+          if (!err) console.log(`  ✅ Imagem atualizada para cupcake #${id}`);
+        });
+      });
+      
+      updateStmt.finalize();
     }
   });
   checkCupcakes.finalize();
@@ -152,88 +174,108 @@ const authMiddleware = (req, res, next) => {
 // ==========================================
 
 app.post('/api/auth/register', async (req, res) => {
-  const { name, email, password } = req.body;
+  try {
+    const { name, email, password } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
-  }
+    console.log('📝 Tentativa de registro:', { name, email });
 
-  if (password.length < 6) {
-    return res.status(400).json({ error: 'A senha deve ter no mínimo 6 caracteres' });
-  }
-
-  db.get('SELECT id FROM users WHERE email = ?', [email], async (err, row) => {
-    if (err) {
-      return res.status(500).json({ error: 'Erro ao verificar email' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
 
-    if (row) {
-      return res.status(400).json({ error: 'Este email já está cadastrado' });
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'A senha deve ter no mínimo 6 caracteres' });
     }
 
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
+    // Verificar se email já existe
+    db.get('SELECT id FROM users WHERE email = ?', [email], async (err, row) => {
+      if (err) {
+        console.error('❌ Erro ao verificar email:', err);
+        return res.status(500).json({ error: 'Erro ao verificar email' });
+      }
 
-      db.run(
-        'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-        [name, email, hashedPassword, 'user'], // SEMPRE cria como 'user'
-        function(err) {
-          if (err) {
-            return res.status(500).json({ error: 'Erro ao criar usuário' });
+      if (row) {
+        return res.status(400).json({ error: 'Este email já está cadastrado' });
+      }
+
+      try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        db.run(
+          'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+          [name, email, hashedPassword, 'user'],
+          function(err) {
+            if (err) {
+              console.error('❌ Erro ao criar usuário:', err);
+              return res.status(500).json({ error: 'Erro ao criar usuário: ' + err.message });
+            }
+
+            console.log('✅ Usuário criado:', name, '(user)');
+            res.json({
+              success: true,
+              user: { id: this.lastID, name, email, role: 'user' },
+              message: 'Usuário cadastrado com sucesso!'
+            });
           }
-
-          console.log('✅ Usuário criado:', name, '(user)');
-          res.json({
-            success: true,
-            user: { id: this.lastID, name, email, role: 'user' },
-            message: 'Usuário cadastrado com sucesso!'
-          });
-        }
-      );
-    } catch (error) {
-      res.status(500).json({ error: 'Erro ao processar senha' });
-    }
-  });
+        );
+      } catch (error) {
+        console.error('❌ Erro ao processar senha:', error);
+        res.status(500).json({ error: 'Erro ao processar senha' });
+      }
+    });
+  } catch (error) {
+    console.error('❌ Erro geral no registro:', error);
+    res.status(500).json({ error: 'Erro interno do servidor: ' + error.message });
+  }
 });
 
-app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email e senha são obrigatórios' });
-  }
+    console.log('🔐 Tentativa de login:', email);
 
-  db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
-    if (err) {
-      return res.status(500).json({ error: 'Erro ao buscar usuário' });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email e senha são obrigatórios' });
     }
 
-    if (!user) {
-      return res.status(401).json({ error: 'Email ou senha incorretos' });
-    }
+    db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
+      if (err) {
+        console.error('❌ Erro ao buscar usuário:', err);
+        return res.status(500).json({ error: 'Erro ao buscar usuário' });
+      }
 
-    try {
-      const passwordMatch = await bcrypt.compare(password, user.password);
-
-      if (!passwordMatch) {
+      if (!user) {
         return res.status(401).json({ error: 'Email ou senha incorretos' });
       }
 
-      console.log('✅ Login bem-sucedido:', user.name, `(${user.role})`);
-      res.json({
-        success: true,
-        user: { 
-          id: user.id, 
-          name: user.name, 
-          email: user.email,
-          role: user.role // Retorna o role
-        },
-        message: 'Login realizado com sucesso!'
-      });
-    } catch (error) {
-      res.status(500).json({ error: 'Erro ao verificar senha' });
-    }
-  });
+      try {
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
+          return res.status(401).json({ error: 'Email ou senha incorretos' });
+        }
+
+        console.log('✅ Login bem-sucedido:', user.name, `(${user.role})`);
+        res.json({
+          success: true,
+          user: { 
+            id: user.id, 
+            name: user.name, 
+            email: user.email,
+            role: user.role
+          },
+          message: 'Login realizado com sucesso!'
+        });
+      } catch (error) {
+        console.error('❌ Erro ao verificar senha:', error);
+        res.status(500).json({ error: 'Erro ao verificar senha' });
+      }
+    });
+  } catch (error) {
+    console.error('❌ Erro geral no login:', error);
+    res.status(500).json({ error: 'Erro interno do servidor: ' + error.message });
+  }
 });
 
 // Verificar permissão de admin
