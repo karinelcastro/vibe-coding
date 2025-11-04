@@ -303,17 +303,7 @@ const CupcakesTab = ({ cupcakes, onAdd, onEdit, onDelete }) => {
         {cupcakes.map((cupcake) => (
           <div key={cupcake.id} className="admin-cupcake-card">
             <div className="admin-cupcake-image">
-              {cupcake.image_url ? (
-                <img
-                  src={cupcake.image_url}
-                  alt={cupcake.name}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "flex";
-                  }}
-                />
-              ) : null}
-              <div className="admin-cupcake-fallback">🧁</div>
+              <CupcakeImage url={cupcake.image_url} alt={cupcake.name} />
             </div>
 
             <div className="admin-cupcake-content">
@@ -349,6 +339,24 @@ const CupcakesTab = ({ cupcakes, onAdd, onEdit, onDelete }) => {
         ))}
       </div>
     </div>
+  );
+};
+
+// Componente auxiliar para exibir imagens
+const CupcakeImage = ({ url, alt }) => {
+  const [imageError, setImageError] = useState(false);
+
+  if (!url || imageError) {
+    return <div className="admin-cupcake-fallback">🧁</div>;
+  }
+
+  return (
+    <img
+      src={url}
+      alt={alt}
+      onError={() => setImageError(true)}
+      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+    />
   );
 };
 
@@ -434,31 +442,58 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
     available: cupcake?.available !== undefined ? cupcake.available : 1,
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [imagePreviewError, setImagePreviewError] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
+
+    // Validações
+    if (!formData.name.trim()) {
+      setError("O nome é obrigatório");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      setError("O preço deve ser maior que zero");
+      setLoading(false);
+      return;
+    }
 
     try {
       const url = cupcake
         ? `${API_BASE}/admin/cupcakes/${cupcake.id}`
         : `${API_BASE}/admin/cupcakes`;
 
+      const payload = {
+        ...formData,
+        price: parseFloat(formData.price),
+        available: formData.available ? 1 : 0,
+      };
+
+      console.log("Enviando dados:", payload);
+
       const res = await fetch(url, {
         method: cupcake ? "PUT" : "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const result = await res.json();
+
+      console.log("Resposta do servidor:", result);
+
       if (result.success) {
         onSuccess();
       } else {
-        alert(result.error || "Erro ao salvar cupcake");
+        setError(result.error || "Erro ao salvar cupcake");
       }
     } catch (error) {
       console.error("Erro ao salvar cupcake:", error);
-      alert("Erro ao salvar cupcake");
+      setError("Erro ao conectar com o servidor");
     } finally {
       setLoading(false);
     }
@@ -476,6 +511,8 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="cupcake-form">
+          {error && <div className="error-message">⚠️ {error}</div>}
+
           <div className="form-group">
             <label>Nome *</label>
             <input
@@ -507,6 +544,7 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
               <input
                 type="number"
                 step="0.01"
+                min="0"
                 required
                 value={formData.price}
                 onChange={(e) =>
@@ -536,13 +574,31 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
           <div className="form-group">
             <label>URL da Imagem</label>
             <input
-              type="url"
+              type="text"
               value={formData.image_url}
-              onChange={(e) =>
-                setFormData({ ...formData, image_url: e.target.value })
-              }
-              placeholder="https://..."
+              onChange={(e) => {
+                setFormData({ ...formData, image_url: e.target.value });
+                setImagePreviewError(false);
+              }}
+              placeholder="/images/cupcakes/nome.jpg ou https://..."
             />
+            {formData.image_url && (
+              <div className="image-preview-container">
+                {imagePreviewError ? (
+                  <div className="image-preview-fallback">
+                    🧁
+                    <span>Imagem não disponível</span>
+                  </div>
+                ) : (
+                  <img
+                    src={formData.image_url}
+                    alt="Preview"
+                    className="image-preview"
+                    onError={() => setImagePreviewError(true)}
+                  />
+                )}
+              </div>
+            )}
           </div>
 
           <div className="form-group checkbox-group">

@@ -922,7 +922,7 @@ const App = () => {
             <div className="contact-item">
               <div className="contact-icon">📞</div>
               <h4>Telefone</h4>
-              <p>(64) 99999-9999</p>
+              <p>(64) 99622-5998</p>
             </div>
             <div className="contact-item">
               <div className="contact-icon">✉️</div>
@@ -933,7 +933,7 @@ const App = () => {
               <div className="contact-icon">📍</div>
               <h4>Endereço</h4>
               <p>
-                Rua Egerineu Rocha
+                Rua Engenheiro da Rocha
                 <br />
                 Orizona, GO
               </p>
