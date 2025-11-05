@@ -469,12 +469,20 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
         : `${API_BASE}/admin/cupcakes`;
 
       const payload = {
-        ...formData,
+        name: formData.name.trim(),
+        description: formData.description.trim(),
         price: parseFloat(formData.price),
-        available: formData.available ? 1 : 0,
+        image_url: formData.image_url.trim(),
+        category: formData.category,
+        available:
+          formData.available === 1 || formData.available === true ? 1 : 0,
       };
 
-      console.log("Enviando dados:", payload);
+      console.log("🔵 Modo:", cupcake ? "EDITAR" : "CRIAR");
+      console.log("🔵 URL:", url);
+      console.log("🔵 Method:", cupcake ? "PUT" : "POST");
+      console.log("🔵 Payload:", payload);
+      console.log("🔵 Headers:", getAuthHeaders());
 
       const res = await fetch(url, {
         method: cupcake ? "PUT" : "POST",
@@ -482,18 +490,23 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
         body: JSON.stringify(payload),
       });
 
+      console.log("🟢 Status da resposta:", res.status);
+      console.log("🟢 Status OK?:", res.ok);
+
       const result = await res.json();
 
-      console.log("Resposta do servidor:", result);
+      console.log("🟢 Resposta do servidor:", result);
 
-      if (result.success) {
+      if (res.ok && result.success) {
+        console.log("✅ Sucesso! Chamando onSuccess()");
         onSuccess();
       } else {
+        console.log("❌ Erro:", result.error || result);
         setError(result.error || "Erro ao salvar cupcake");
       }
     } catch (error) {
-      console.error("Erro ao salvar cupcake:", error);
-      setError("Erro ao conectar com o servidor");
+      console.error("❌ Erro ao salvar cupcake:", error);
+      setError("Erro ao conectar com o servidor: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -605,13 +618,16 @@ const CupcakeModal = ({ cupcake, onClose, onSuccess }) => {
             <label>
               <input
                 type="checkbox"
-                checked={formData.available === 1}
-                onChange={(e) =>
+                checked={
+                  formData.available === 1 || formData.available === true
+                }
+                onChange={(e) => {
+                  console.log("Checkbox mudou:", e.target.checked);
                   setFormData({
                     ...formData,
                     available: e.target.checked ? 1 : 0,
-                  })
-                }
+                  });
+                }}
               />
               <span>Disponível para venda</span>
             </label>
