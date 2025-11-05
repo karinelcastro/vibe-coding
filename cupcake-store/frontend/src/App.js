@@ -67,7 +67,7 @@ const Header = ({
                       currentView === "favorites" ? "active" : ""
                     }`}
                   >
-                    ❤️ Favoritos
+                    Favoritos
                   </button>
                 )}
 
@@ -88,7 +88,7 @@ const Header = ({
                   showAdmin ? "active" : ""
                 }`}
               >
-                ⚙️ Admin
+                ⚙️Admin
               </button>
             )}
           </div>
@@ -922,7 +922,7 @@ const App = () => {
             <div className="contact-item">
               <div className="contact-icon">📞</div>
               <h4>Telefone</h4>
-              <p>(64) 99622-5998</p>
+              <p>(64) 9922-5998</p>
             </div>
             <div className="contact-item">
               <div className="contact-icon">✉️</div>

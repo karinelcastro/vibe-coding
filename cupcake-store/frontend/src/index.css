@@ -25,16 +25,17 @@ body {
 /* Badge de Admin no Header */
 .admin-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
-  color: #78350f;
+  background: linear-gradient(135deg, #ec4899, #dd3c65);
+  color: #3006235b;
   font-size: 0.625rem;
   font-weight: 700;
   padding: 0.125rem 0.5rem;
+  border: 0.5px solid #3006235b;
   border-radius: 9999px;
   margin-left: 0.5rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 2px 4px #f50bbb4d;
 }
 
 /* Botão Admin no Header */
