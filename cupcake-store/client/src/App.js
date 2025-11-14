@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminPanel from "./AdminPanel";
 
-const API_BASE = "http://localhost:3001/api";
+import API_BASE from './config';
 
 const Loading = () => (
   <div className="loading">

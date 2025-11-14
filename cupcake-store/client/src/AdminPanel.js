@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const API_BASE = "http://localhost:3001/api";
+import API_BASE from './config';
 
 // Helper para adicionar header de autenticação
 const getAuthHeaders = () => {

@@ -684,6 +684,19 @@ app.get("/api/health", (req, res) => {
 });
 
 // ==========================================
+// SERVIR O FRONTEND EM PRODUÇÃO
+// ==========================================
+if (process.env.NODE_ENV === 'production') {
+  // Servir arquivos estáticos do React build
+  app.use(express.static(path.join(__dirname, 'client/build')));
+  
+  // Para qualquer rota que NÃO seja API, retorna o React app
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  });
+}
+
+// ==========================================
 // INICIALIZAÇÃO DO SERVIDOR
 // ==========================================
 
@@ -691,6 +704,9 @@ app.listen(PORT, () => {
   console.log(`🧁 Servidor rodando na porta ${PORT}`);
   console.log(`📊 API disponível em http://localhost:${PORT}/api`);
   console.log(`🔒 Sistema de autenticação admin ativo!`);
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`⚛️  Frontend React sendo servido!`);
+  }
 });
 
 process.on("SIGINT", () => {
